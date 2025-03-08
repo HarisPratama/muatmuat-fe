@@ -1,6 +1,6 @@
 'use client'
 
-import React, {useState, useMemo, useEffect, useActionState} from "react";
+import React, {useState, useMemo, useEffect, useActionState, startTransition} from "react";
 import ModalForm from "@/app/ModalForm";
 import {
     Button,
@@ -22,10 +22,12 @@ const initialState = {
     message: '',
 }
 
+
 export default function ProductSection({products}: {products: any}) {
     const [state, deleteAction, pending] = useActionState(deleteProduct, initialState);
     const [state2, addFavoriteAction, pendingAdd] = useActionState(addProductToFavorite, initialState);
 
+    const { refresh } = useRouter();
     const [open, setOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [productId, setProductId] = useState(0);
@@ -154,7 +156,12 @@ export default function ProductSection({products}: {products: any}) {
                         <div className="flex gap-3">
                             <Button onClick={editProduct(product)} variant="outlined">Edit</Button>
                             <Button onClick={() => {handleOpenDialog(product.id)}} variant="outlined">Delete</Button>
-                            <Button onClick={async () =>  addFavoriteAction(product)} variant={product.is_favorite ? "contained" :"outlined"}>Add To Favorite</Button>
+                            <Button onClick={async () => {
+                                startTransition(() => {
+                                    addFavoriteAction(product)
+                                })
+                                refresh()
+                            }} variant={product.is_favorite ? "contained" :"outlined"}>Add To Favorite</Button>
                         </div>
                     </div>
                 ))}
@@ -180,7 +187,10 @@ export default function ProductSection({products}: {products: any}) {
                     <Button onClick={handleCloseDialog}>No</Button>
                     <Button disabled={pending} onClick={async () => {
                         handleCloseDialog()
-                        return deleteAction(productId)
+                        startTransition(() => {
+                            deleteAction(productId)
+                        })
+                        refresh()
                     }} autoFocus>
                         Yes
                     </Button>
