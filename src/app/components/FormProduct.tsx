@@ -3,6 +3,8 @@
 import React, {useActionState, useState, useEffect} from "react";
 import {createPost, updateProduct} from "@/app/lib/action";
 import { TextField, Button, Alert } from '@mui/material';
+import {useRouter} from "next/navigation";
+
 import CheckIcon from '@mui/icons-material/Check';
 
 const initialState = {
@@ -17,6 +19,7 @@ export default function FormProduct({product}: {product: any}) {
         price: 0,
         stock: 0,
     })
+    const { refresh } = useRouter()
     const handleChangeNumber = (value: number) => {
 
     }
@@ -26,6 +29,9 @@ export default function FormProduct({product}: {product: any}) {
             setForm(product)
         }
     }, [])
+    useEffect(() => {
+        if(state.message.length > 0) refresh()
+    }, [state]);
 
     const onChangeValue = (e:any) => {
         const {name, value} = e.target
